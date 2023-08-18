@@ -8,6 +8,14 @@ B = {'sin(x)','cos(x)','tg(x)','arcsin(x)','arcsin(x)','arctg(x)','exp(x)','ln(x
 
 B_DIFF = {"cos(x)","-sin(x)","1 / (cos(x) ** 2)","1 / sqrt(1 - x ** 2)","1 / (1 + x ** 2)","exp(x)","1 / x","0","1"}
 
+def x_exists_handler(func,result,x):
+    return result if x else func
+
+def plus_or_minus_eval_handeling(f,g,sign,x):
+    if x:
+        return f+g if sign == "+" else f-g
+    return lambda x: f(x)+g(x) if sign == "-" else lambda x: f(x)-g(x)
+
 def is_number(string) -> bool:
     global NUMBERS
     if string[0] == '-':
@@ -161,5 +169,54 @@ def Diff(f) -> str:
             if sign == "^":
                 return exponent_handeling(f_x,g_x,Diff(f_x),Diff(g_x))
     raise ValueError("Invalid function")
+    
+def Eval(f, x=False) -> float:
+    if f == 'sin(x)':
+        return x_exists_handler(np.sin,np.sin(x),x)
+    if f == 'cos(x)':
+        return x_exists_handler(np.cos,np.cos(x),x)
+    if f == 'tg(x)':
+        return x_exists_handler(np.tan,np.tan(x),x)
+    if f == 'arcsin(x)':
+        return x_exists_handler(np.arcsin,np.arcsin(x),x)
+    if f == 'arccos(x)':
+        return x_exists_handler(np.arccos,np.arccos(x),x)
+    if f == 'arctg(x)':
+        return x_exists_handler(np.arctan,np.arctan(x),x)
+    if f == 'exp(x)':
+        return x_exists_handler(np.exp,np.exp(x),x)
+    if f == 'ln(x)':
+        return x_exists_handler(np.ln,np.ln(x),x)
+    if is_number(f):
+        return float(f)
+    if f == "x":
+        return x_exists_handler(lambda x: x,x,x)
+    if f[0] == "x" and f[1] == "^" and is_number(f[2:]):
+        return x_exists_handler(lambda x: x**float(f[2:]),x**float(f[2:]),x)
+    string = f[1:-1]
+    if string[0] == '-':
+        return -Eval(string[1:],x)
+    brackets = 0
+    for i in range(len(string)):
+        if string[i] == '(':
+            brackets += 1
+        if string[i] == ')':
+            brackets -= 1
+        if brackets == 0 and (string[i] in CREATION_SIGNS):
+            sign = string[i]
+            f_x = string[:i]
+            g_x = string[i+1:]
+            if sign in {'+', '-'}:
+                return plus_or_minus_eval_handeling(Eval(f_x,x),Eval(g_x,x),sign,x)
+            if sign == "*":
+                return multiply_handeling(f_x,g_x,Diff(f_x),Diff(g_x),"+")
+            if sign == "/":
+                return division_handeling(f_x,g_x,Diff(f_x),Diff(g_x))
+            if sign == "^":
+                return exponent_handeling(f_x,g_x,Diff(f_x),Diff(g_x))
+    raise ValueError("Invalid function")
+    
         
 print(Diff("(x/x)"))
+
+print(Eval("(x+x)")(2))
