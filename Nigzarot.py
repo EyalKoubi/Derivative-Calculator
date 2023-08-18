@@ -12,6 +12,8 @@ def is_number(string) -> bool:
     global NUMBERS
     if string[0] == '-':
         string = string[1:]
+    if string[0] == '.':
+        return False
     if string[0] == '0':
         return True if len(string) == 1 else False
     dot_appeared = False
@@ -54,29 +56,15 @@ def multiply_handeling(f_x,g_x,df_x,dg_x,sign):
     if df_x == "0" or g_x == "0":
         if f_x == "0" or dg_x == "0":
             return "0";
-        if f_x == "1":
-            return dg_x
-        if dg_x == "1":
-            return f_x
+        if f_x == "1" or dg_x == "1":
+            return adish_handeling(f_x,dg_x,"1")
         return numbers_handeling(f_x,dg_x,"*")
     if f_x == "0" or dg_x == "0":
-        if df_x == "1":
-            return g_x
-        if g_x == "1":
-            return df_x
+        if df_x == "1" or g_x == "1":
+            return adish_handeling(df_x,g_x,"1")
         return numbers_handeling(df_x,g_x,"*")
-    if df_x == "1":
-        if f_x == "1":
-            return numbers_handeling(g_x,dg_x,sign)
-        if dg_x == "1":
-            return numbers_handeling(g_x,f_x,sign)
-    if g_x == "1":
-        if f_x == "1":
-            return numbers_handeling(df_x,dg_x,sign)
-        if dg_x == "1":
-            return numbers_handeling(df_x,f_x,sign)
-    part_one = numbers_handeling(df_x,g_x,"*")
-    part_two = numbers_handeling(f_x,dg_x,"*")
+    part_one = adish_handeling(df_x,g_x,"1") if df_x == "1" or g_x == "1" else numbers_handeling(df_x,g_x,"*")
+    part_two = adish_handeling(f_x,dg_x,"1") if f_x == "1" or dg_x == "1" else numbers_handeling(f_x,dg_x,"*")
     return numbers_handeling(part_one,part_two,sign)
 
 def division_handeling(f_x,g_x,df_x,dg_x):
@@ -135,4 +123,4 @@ def Diff(f) -> str:
             if sign == "/":
                 return division_handeling(f_x,g_x,Diff(f_x),Diff(g_x))
         
-print(Diff("(x^2/cos(x))"))
+print(Diff("(x/cos(x))"))
