@@ -107,7 +107,8 @@ def adish_handeling(string_one,string_two,adish) -> str:
         return adish if string_two == adish else string_two
     if string_two == adish:
         return string_one
-    
+
+# in ^ diff: handle g'(x)*ln(f(x)) part
 def first_part_exp_d(dg_x,f_x) -> str:
     if is_number(f_x) and float(f_x) <= 0:
         raise ValueError("Math Error")
@@ -118,6 +119,7 @@ def first_part_exp_d(dg_x,f_x) -> str:
         return adish_handeling(dg_x,lan_f_x,"1")
     return numbers_handeling(dg_x,lan_f_x,"*")
 
+# in ^ diff: handle (g(x)*f'(x))/f(x) part
 def second_part_exp_d(g_x,f_x,df_x):
     if f_x == "0":
         raise ValueError("Math Error")
@@ -125,12 +127,16 @@ def second_part_exp_d(g_x,f_x,df_x):
     if f_x == "1":
         return mone
     return numbers_handeling(mone,f_x,"/")
-    
+
+# define function that hendeling +
+# or - creation signs (in Diff function)
 def plus_or_minus_handeling(df_x,dg_x,sign) -> str:
     if df_x == "0" or dg_x == "0":
         return adish_handeling(df_x,dg_x,"0")
     return numbers_handeling(df_x,dg_x,sign)
 
+# define function that hendeling *
+# (in Diff function)
 def multiply_handeling(f_x,g_x,df_x,dg_x,sign):
     if df_x == "0" or g_x == "0":
         if f_x == "0" or dg_x == "0":
@@ -146,6 +152,8 @@ def multiply_handeling(f_x,g_x,df_x,dg_x,sign):
     part_two = adish_handeling(f_x,dg_x,"1") if f_x == "1" or dg_x == "1" else numbers_handeling(f_x,dg_x,"*")
     return numbers_handeling(part_one,part_two,sign)
 
+# define function that hendeling /
+# (in Diff function)
 def division_handeling(f_x,g_x,df_x,dg_x):
     if g_x == "0":
         raise ValueError("Math Error")
@@ -153,6 +161,8 @@ def division_handeling(f_x,g_x,df_x,dg_x):
     mechane = numbers_handeling(g_x,"2","^")
     return numbers_handeling(mone,mechane,"/")
 
+# define function that hendeling ^
+# (in Diff function)
 def exponent_handeling(f_x,g_x,df_x,dg_x) -> str:
     if f_x == "0" and g_x == "0":
         raise ValueError("Math Error")
@@ -170,8 +180,12 @@ def exponent_handeling(f_x,g_x,df_x,dg_x) -> str:
     end = numbers_handeling(first_part_exp,second_part_exp,"+")
     return numbers_handeling(start,end,"*")
     
-
+# define function that return the
+# diff of function (for example:
+# Diff("(x^2)") = (2*x)
 def Diff(f) -> str:
+    
+    # bases cases handeling
     if f == 'sin(x)':
         return "cos(x)"
     if f == 'cos(x)':
@@ -194,9 +208,13 @@ def Diff(f) -> str:
         return "1"
     if f[0] != '(' or f[-1] != ')':
         raise ValueError("Invalid function")
+        
+    # "-" case handeling
     string = f[1:-1]
     if string[0] == '-':
         return '(' + '-' + Diff(string[1:]) + ')'
+    
+    # creation signs handeling
     brackets = 0
     for i in range(len(string)):
         if string[i] == '(':
@@ -284,7 +302,8 @@ for i in range(300):
     string = "(" + string + "/" + "x)"
  
 before = time.time()
-print(Eval(Diff(string))(2))
+print(Diff("(x^2)"))
+print(Eval(Diff("(x^2)"),0.5))
 T = time.time() - before
 
 print("T: ",T)
