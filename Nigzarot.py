@@ -1,23 +1,40 @@
 import numpy as np
 
+import time
+
+# define efficient groups (sets)
+
+# creation signs set
 CREATION_SIGNS = {'+','-','*','/','^'}
 
+# digits set
 NUMBERS = {'0','1','2','3','4','5','6','7','8','9'}
 
+# base set
 B = {'sin(x)','cos(x)','tg(x)','arcsin(x)','arcsin(x)','arctg(x)','exp(x)','ln(x)','x'}
 
+# diff of base functions set
 B_DIFF = {"cos(x)","-sin(x)","(1 / (cos(x) ** 2))","(1 / sqrt(1 - x ** 2))","(1 / (1 + x ** 2))","exp(x)","(1 / x)","0","1"}
 
+# define function that return
+# function or value depending
+# of the value of x variable
 def x_exists_handler(func,result,x):
-    return result if x else func
+    return result if x!="not exists" else func
 
+# define function that handle
+# "-" sign evaluation
 def eval_minus_handeling(f,x):
-    if x:
+    if x!="not exists":
         return -f
     return lambda x: -f(x)
 
+# define function that handle
+# creation signs evaluation
 def eval_creation_signs_handeling(f,g,sign,x):
-    if x:
+    
+    # values cases
+    if x!="not exists":
         if sign == "+":
             return f+g
         if sign == "-":
@@ -32,6 +49,8 @@ def eval_creation_signs_handeling(f,g,sign,x):
             if f == 0 and g == 0:
                 raise ValueError("MathError")
             return f**g
+        
+    # functions cases
     if sign == "+":
         return lambda x: f(x)+g(x)
     if sign == "-":
@@ -43,6 +62,9 @@ def eval_creation_signs_handeling(f,g,sign,x):
     if sign == "^":
         return lambda x: f(x)**g(x)
 
+# define function that check
+# if the string is string that
+# present number (from R)
 def is_number(string) -> bool:
     global NUMBERS
     if string[0] == '-':
@@ -62,6 +84,8 @@ def is_number(string) -> bool:
             return False
     return True
 
+# define function that handle the case
+# that the string present numbers (in Diff function)
 def numbers_handeling(string_one,string_two,sign) -> str:
     if not is_number(string_one) or not is_number(string_two):
         return "(" + string_one + sign + string_two + ")"
@@ -76,6 +100,8 @@ def numbers_handeling(string_one,string_two,sign) -> str:
     if sign == "^":
         return str(float(string_one)**float(string_two))
 
+# define function that handle the case of
+# 'adish' number (like 0 for + or 1 for *..)
 def adish_handeling(string_one,string_two,adish) -> str:
     if string_one == adish:
         return adish if string_two == adish else string_two
@@ -190,8 +216,14 @@ def Diff(f) -> str:
             if sign == "^":
                 return exponent_handeling(f_x,g_x,Diff(f_x),Diff(g_x))
     raise ValueError("Invalid function")
+
+# define function that evaluate the value
+# function, or the value of the function
+# for specific x in the function
+# (if x is given)
+def Eval(f, x="not exists") -> float:
     
-def Eval(f, x=False) -> float:
+    # bases cases handeling
     if f == 'sin(x)':
         return x_exists_handler(np.sin,np.sin(x),x)
     if f == 'cos(x)':
@@ -224,13 +256,16 @@ def Eval(f, x=False) -> float:
         return x_exists_handler(lambda x: x,x,x)
     if f == "(2*x)":
         return x_exists_handler(lambda x: 2*x,2*x,x)
+    
+    # "-" case handeling
     string = f[1:-1]
-    print("f: ",f)
     if string[0] == '-':
         st = string[1:]
         if st not in B.union(B_DIFF) and (st[0] != '(' or st[-1] != ')'):
             st = '(' + st + ')'
         return eval_minus_handeling(Eval(st,x),x)
+    
+    # creation signs handeling
     brackets = 0
     for i in range(len(string)):
         if string[i] == '(':
@@ -244,6 +279,12 @@ def Eval(f, x=False) -> float:
             return eval_creation_signs_handeling(Eval(f_x,x),Eval(g_x,x),sign,x)
     raise ValueError("Invalid function")
     
-print(Diff("(2*x)"))
+string = "x"
+for i in range(300):
+    string = "(" + string + "/" + "x)"
+ 
+before = time.time()
+print(Eval(Diff(string))(2))
+T = time.time() - before
 
-print(Eval(Diff("x"),0.5))
+print("T: ",T)
