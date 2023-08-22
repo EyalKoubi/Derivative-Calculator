@@ -303,7 +303,7 @@ for i in range(300):
  
 before = time.time()
 print(Diff("(x^2)"))
-print(Eval(Diff("(x^2)"),0.5))
+print(Eval(Diff("(((x^ln(x))*sin(x))/(arccos(x)+(5*x)))"),0.5))
 T = time.time() - before
 
 print("T: ",T)
