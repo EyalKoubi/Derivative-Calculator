@@ -9,66 +9,62 @@ tailOfStr :: [Char] -> Char -> Char
 tailOfStr [] last = last
 tailOfStr (a:ax) last = tailOfStr ax a
 
--- define function that check if the last letter is a specific letter
-isNotLastIsSomething :: [Char] -> Char -> Bool
-isNotLastIsSomething str letter | tailOfStr str '@' == letter = False
-                                | otherwise = True
-
 -- define function that check if the last letter is not a specific letter
+isNotLastIsSomething :: [Char] -> Char -> Bool
+isNotLastIsSomething str letter = not (tailOfStr str '@' == letter)
+
+-- define function that check if the last letter is a specific letter
 isLastIsSomething :: [Char] -> Char -> Bool
-isLastIsSomething str letter | isNotLastIsSomething str letter = False
-                             | otherwise = True
+isLastIsSomething str letter = not (isNotLastIsSomething str letter)
 
 -- define function that check if the first letter is not a specific letter
 isNotFirstIsSomething :: [Char] -> Char -> Bool
 isNotFirstIsSomething [] letter = True
-isNotFirstIsSomething (a:ax) letter | a == letter = False
-                                    | otherwise = True
+isNotFirstIsSomething (a:ax) letter = not (a == letter)
 
 -- define function that check if the first letter is a specific letter
 isFirstIsSomething :: [Char] -> Char -> Bool
-isFirstIsSomething str letter | isNotFirstIsSomething str letter = False
-                              | otherwise = True
+isFirstIsSomething str letter = not (isNotFirstIsSomething str letter)
 
 -- define function that check if the string length is not 1
 isLenIsNotOne :: [Char] -> Int -> Bool
-isLenIsNotOne [] len | len == 1 = False
-                     | otherwise = True
-isLenIsNotOne (a:ax) len | len == 1 || len == 0 = isLenIsNotOne ax (len+1)
+isLenIsNotOne [] len = not (len == 1)
+isLenIsNotOne (a:ax) len | len == 0 = isLenIsNotOne ax (len+1)
                          | otherwise = True
 
 -- define function that check if not ( (the string length is not 1) and (the first letter is a specific letter) )
+-- for checking if the string is with zero-leading-char
 isNotZeroIsFirstAndItsNotZero :: [Char] -> Bool
-isNotZeroIsFirstAndItsNotZero str | isLenIsNotOne str 0 && isFirstIsSomething str '0' = False
-                                  | otherwise = True
+isNotZeroIsFirstAndItsNotZero str = not (isLenIsNotOne str 0 && isFirstIsSomething str '0')
 
 -- define function that check if the char is present digit
 isDigit :: Char -> Bool
-isDigit x | x == '0' || x == '1' || x == '2' || x == '3' || x == '4' || x == '5' || x == '6' || x == '7' || x == '8' || x == '9' = True
-          | otherwise = False
+isDigit x = (x == '0' || x == '1' || x == '2' || x == '3' || x == '4' || x == '5' || x == '6' || x == '7' || x == '8' || x == '9')
 
 -- define function that check if the string has just digits and only 1 dot
 isHaveJustOneOrlessPointAndOtherAreDigits :: [Char] -> Int -> Bool
-isHaveJustOneOrlessPointAndOtherAreDigits [] cnt | cnt <= 1 = True
-                                                 | otherwise = False
+isHaveJustOneOrlessPointAndOtherAreDigits [] cnt = (cnt <= 1)
 isHaveJustOneOrlessPointAndOtherAreDigits (a:ax) cnt | a == '.' && cnt == 0 = isHaveJustOneOrlessPointAndOtherAreDigits ax 1
-                                               | isDigit a = isHaveJustOneOrlessPointAndOtherAreDigits ax cnt
-                                               | otherwise = False
+                                                     | isDigit a = isHaveJustOneOrlessPointAndOtherAreDigits ax cnt
+                                                     | otherwise = False
 
 -- define function that check if the string is present number
+-- we check for a number. Number is define as:
+-- 1. all the chars are digit except of 0-1 dots
+-- 2. The dot is not in the begining or the end of the string
+-- 3. There is no leading zeros
+-- 4. Number can start with '-'
 isNumber :: [Char] -> Bool
-isNumber str | (isHaveJustOneOrlessPointAndOtherAreDigits str 0 && isNotFirstIsSomething str '.' && isNotZeroIsFirstAndItsNotZero str && isNotLastIsSomething str '.' && isNotEmptyStr str) || (isFirstIsSomething str '-' && isNumber (cutFirst str)) = True
-             | otherwise = False
+isNumber str = (isHaveJustOneOrlessPointAndOtherAreDigits str 0 && isNotFirstIsSomething str '.' && isNotZeroIsFirstAndItsNotZero str && isNotLastIsSomething str '.' && isNotEmptyStr str) || (isFirstIsSomething str '-' && isNumber (cutFirst str))
 
 -- define function that check if the string is not present number
 isNotNumber :: [Char] -> Bool
-isNotNumber str | isNumber str = False
-                | otherwise = True
+isNotNumber str = not (isNumber str)
 
 -- define function that check if not ( (the first letter is specific letter) and (the last letter is specific letter) )
+-- for future use to see if we have starting and ending brackets (in the string)
 isNotFirstIsSomethingOrNotLastIsSomthing :: [Char] -> Char -> Char -> Bool
-isNotFirstIsSomethingOrNotLastIsSomthing str letterOne letterTwo | isFirstIsSomething str letterOne && isLastIsSomething str letterTwo = False
-                                                                 | otherwise = True
+isNotFirstIsSomethingOrNotLastIsSomthing str letterOne letterTwo = not (isFirstIsSomething str letterOne && isLastIsSomething str letterTwo)
 
 -- define function that cut the first letter from the string
 cutFirst :: [Char] -> [Char]
@@ -77,23 +73,22 @@ cutFirst (a:ax) = ax
 
 -- define function that cut the first letter from the string and the last letter from the string
 cutFirstAndLast :: [Char] -> Bool -> [Char] -> [Char]
-cutFirstAndLast [] isFirst new = new
+cutFirstAndLast [] _ new = new
 cutFirstAndLast (a:ax) isFirst new | isFirst = cutFirstAndLast ax False new
-                                   | ax == [] = cutFirstAndLast ax isFirst new
+                                   | ax == [] = new
                                    | otherwise = cutFirstAndLast ax isFirst (new ++ [a])
 
 -- define function that check if the char is present creation sign
 isCreationSign :: Char -> Bool
-isCreationSign letter | letter == '+' || letter == '-' || letter == '*' || letter == '/' || letter == '^' = True
-                      | otherwise = False
+isCreationSign letter = (letter == '+' || letter == '-' || letter == '*' || letter == '/' || letter == '^')
 
--- define function that handle brackets and returns (alpha,beta,@) for (alpha@beta)
-bracketsHandler :: [Char] -> Int -> [Char] -> [Char] -> Char -> ([Char], [Char], Char)
-bracketsHandler [] cnt left right sign = (left,right,sign)
-bracketsHandler (a:ax) cnt left right sign | cnt == 0 && isCreationSign a = (left,ax,a)
-                                           | a == '(' = bracketsHandler ax (cnt+1) (left ++ [a]) right a
-                                           | a == ')' = bracketsHandler ax (cnt-1) (left ++ [a]) right a
-                                           | otherwise = bracketsHandler ax cnt (left ++ [a]) right a
+-- define function that handle brackets and returns (alpha,beta,@) tuple for alpha@beta
+bracketsHandler :: [Char] -> Int -> [Char] -> [Char] -> ([Char], [Char], Char)
+bracketsHandler [] _ left right = (left,right,'@')
+bracketsHandler (a:ax) cnt left right | isCreationSign a && cnt == 0 = (left,ax,a)
+                                      | a == '(' = bracketsHandler ax (cnt+1) (left ++ [a]) right
+                                      | a == ')' = bracketsHandler ax (cnt-1) (left ++ [a]) right
+                                      | otherwise = bracketsHandler ax cnt (left ++ [a]) right
 
 -- define function that returns the first argument from tuple (alpha,beta,@)
 getFirstStr :: ([Char], [Char], Char) -> [Char]
@@ -126,13 +121,12 @@ numbersHandeller firstStr secondStr sign | isNumber firstStr && isNumber secondS
 
 -- define function that handle 2 strings and 1 sign (handle adish case)
 adishHandeller :: [Char] -> [Char] -> [Char] -> [Char]
-adishHandeller firstStr secondStr adish | firstStr == adish && secondStr == adish = adish
-                                        | firstStr == adish = secondStr
+adishHandeller firstStr secondStr adish | firstStr == adish = secondStr
                                         | secondStr == adish = firstStr
 
 -- define function that handle + diff
 plusOrMinusHandller :: [Char] -> [Char] -> Char -> [Char]
-plusOrMinusHandller firstStr secondStr sign | firstStr == "Syntacs Error" || secondStr == "Syntacs Error" || df == "Syntacs Error" || dg == "Syntacs Error" = "Syntacs Error"
+plusOrMinusHandller firstStr secondStr sign | firstStr == "Syntax Error" || secondStr == "Syntax Error" || df == "Syntax Error" || dg == "Syntax Error" = "Syntax Error"
                                             | firstStr == "Math Error" || secondStr == "Math Error" || df == "Math Error" || dg == "Math Error" = "Math Error"
                                             | df == "0" || dg == "0" = adishHandeller df dg "0"
                                             | otherwise = numbersHandeller df dg sign
@@ -141,7 +135,7 @@ plusOrMinusHandller firstStr secondStr sign | firstStr == "Syntacs Error" || sec
 
 -- define function that handle * diff
 multiplyHandeller :: [Char] -> [Char] -> Char -> [Char]
-multiplyHandeller firstStr secondStr sign | firstStr == "Syntacs Error" || secondStr == "Syntacs Error" || df == "Syntacs Error" || dg == "Syntacs Error" = "Syntacs Error"
+multiplyHandeller firstStr secondStr sign | firstStr == "Syntax Error" || secondStr == "Syntax Error" || df == "Syntax Error" || dg == "Syntax Error" = "Syntax Error"
                                           | firstStr == "Math Error" || secondStr == "Math Error" || df == "Math Error" || dg == "Math Error" = "Math Error"
                                           | (df == "0" || secondStr == "0") && (firstStr == "0" || dg == "0") = "0"
                                           | (df == "0" || secondStr == "0") && (firstStr == "1" || dg == "1") = adishHandeller firstStr dg "1"
@@ -161,7 +155,7 @@ multiplyHandeller firstStr secondStr sign | firstStr == "Syntacs Error" || secon
 
 -- define function that handle / diff
 divisionHandeller :: [Char] -> [Char] -> [Char]
-divisionHandeller firstStr secondStr | firstStr == "Syntacs Error" || secondStr == "Syntacs Error" || mone == "Syntacs Error" || mechane == "Syntacs Error" = "Syntacs Error"
+divisionHandeller firstStr secondStr | firstStr == "Syntax Error" || secondStr == "Syntax Error" || mone == "Syntax Error" || mechane == "Syntax Error" = "Syntax Error"
                                      | secondStr == "0" || firstStr == "Math Error" || secondStr == "Math Error" || mone == "Math Error" || mechane == "Math Error" = "Math Error"
                                      | otherwise = numbersHandeller mone mechane '/'
                                         where
@@ -176,18 +170,18 @@ isLanError str | isNotNumber str = False
 
 -- define function that handle ^ diff - g`(x)*ln(f(x))
 firstPartOfExpDiff :: [Char] -> [Char] -> [Char]
-firstPartOfExpDiff dgx fx | dgx == "Syntacs Error" || fx == "Syntacs Error" = "Syntacs Error"
+firstPartOfExpDiff dgx fx | dgx == "Syntax Error" || fx == "Syntax Error" = "Syntax Error"
                           | isLanError fx || dgx == "Math Error" || fx == "Math Error" = "Math Error"
                           | dgx == "0" = "0"
-                          | isNumber fx && (dgx == "1" || (doubleToString $ log(stringToDouble fx)) == "1") = adishHandeller dgx (doubleToString $ log(stringToDouble fx)) "1"
+                          | isNumber fx && (dgx == "1" || log(stringToDouble fx) == 1) = adishHandeller dgx (doubleToString $ log(stringToDouble fx)) "1"
                           | isNumber fx = numbersHandeller dgx (doubleToString $ log(stringToDouble fx)) '*'
                           | dgx == "1" = adishHandeller dgx lanFxStr "1"
                           | otherwise = numbersHandeller dgx lanFxStr '*'
                             where lanFxStr = "ln(" ++ fx ++ ")"
 
--- define function that handle ^ diff - (g(x)*f(x))/f`(x)
+-- define function that handle ^ diff - (g(x)*f'(x))/f(x)
 secondPartOfExpDiff :: [Char] -> [Char] -> [Char] -> [Char]
-secondPartOfExpDiff gx fx dfx | gx == "Syntacs Error" || fx == "Syntacs Error" || dfx == "Syntacs Error" = "Syntacs Error"
+secondPartOfExpDiff gx fx dfx | gx == "Syntax Error" || fx == "Syntax Error" || dfx == "Syntax Error" = "Syntax Error"
                               | fx == "0" || gx == "Math Error" || fx == "Math Error" || dfx == "Math Error" = "Math Error"
                               | (gx == "1" || dfx == "1") && fx == "1" = moneAdish
                               | gx == "1" || dfx == "1" = numbersHandeller moneAdish fx '/'
@@ -199,12 +193,12 @@ secondPartOfExpDiff gx fx dfx | gx == "Syntacs Error" || fx == "Syntacs Error" |
 
 -- define function that handle ^ diff
 exponentHandeller :: [Char] -> [Char] -> [Char]
-exponentHandeller firstStr secondStr | firstStr == "Syntacs Error" || secondStr == "Syntacs Error" || df == "Syntacs Error" || dg == "Syntacs Error" = "Syntacs Error"
+exponentHandeller firstStr secondStr | firstStr == "Syntax Error" || secondStr == "Syntax Error" || df == "Syntax Error" || dg == "Syntax Error" = "Syntax Error"
                                      | (firstStr == "0" && secondStr == "0") || firstStr == "Math Error" || secondStr == "Math Error" || df == "Math Error" || dg == "Math Error" = "Math Error"
                                      | firstStr == "0" = "0"
-                                     | secondStr == "0" = "1"
-                                     | firstStr == "1" = "1"
-                                     | secondStr == "1" = firstStr
+                                     | secondStr == "0" = "0"
+                                     | firstStr == "1" = "0"
+                                     | secondStr == "1" = df
                                      | otherwise = numbersHandeller start end '*'
                                         where
                                             df = diff firstStr
@@ -226,19 +220,20 @@ diff str | str == "sin(x)" = "cos(x)"
          | str == "ln(x)" = "(1 / x)"
          | str == "x" = "1"
          | isNumber str = "0"
-         | isNotFirstIsSomethingOrNotLastIsSomthing str '(' ')' = "Syntacs Error"
-         | isFirstIsSomething withOutStartAndEnd '-' && minusRes == "Math Error" = "Math Error"
-         | isFirstIsSomething withOutStartAndEnd '-' && minusRes == "Syntacs Error" = "Syntacs Error"
-         | isFirstIsSomething withOutStartAndEnd '-' = "(-" ++ minusRes ++ ")"
+         | isNotFirstIsSomethingOrNotLastIsSomthing str '(' ')' = "Syntax Error"
+         | isFirstIsSomething withOutBrackets '-' && minusDiff == "Math Error" = "Math Error"
+         | isFirstIsSomething withOutBrackets '-' && minusDiff == "Syntax Error" = "Syntax Error"
+         | isFirstIsSomething withOutBrackets '-' && isNumber minusDiff = "-" ++ minusDiff
+         | isFirstIsSomething withOutBrackets '-' = "(-" ++ minusDiff ++ ")"
          | getSign resTuple == '+' = plusOrMinusHandller firstPart secondPart '+'
          | getSign resTuple == '-' = plusOrMinusHandller firstPart secondPart '-'
          | getSign resTuple == '*' = multiplyHandeller firstPart secondPart '+'
          | getSign resTuple == '/' = divisionHandeller firstPart secondPart
          | getSign resTuple == '^' = exponentHandeller firstPart secondPart
-         | otherwise = "Syntacs Error"
-            where minusRes = diff $ cutFirst $ cutFirstAndLast str True ""
-                  withOutStartAndEnd = cutFirstAndLast str True ""
-                  resTuple = bracketsHandler withOutStartAndEnd 0 "" "" '@'
+         | otherwise = "Syntax Error"
+            where withOutBrackets = cutFirstAndLast str True ""
+                  minusDiff = diff $ cutFirst withOutBrackets
+                  resTuple = bracketsHandler withOutBrackets 0 "" ""
                   firstPart = getFirstStr resTuple
                   secondPart = getSecondStr resTuple
 
@@ -259,8 +254,8 @@ eval f x | f == "sin(x)" = sin x
          | f == "(1 / x)" = (1 / x)
          | isNumber f = stringToDouble f
          | f == "x" = x
-         | f == "Math Error" || f == "Syntacs Error" || isNotFirstIsSomethingOrNotLastIsSomthing f '(' ')' = 0/0
-         | isFirstIsSomething withOutStartAndEnd '-' = minusRes
+         | f == "Math Error" || f == "Syntax Error" || isNotFirstIsSomethingOrNotLastIsSomthing f '(' ')' = 0/0
+         | isFirstIsSomething withOutBrackets '-' = minusDiff
          | getSign resTuple == '+' = eval firstPart x + eval secondPart x
          | getSign resTuple == '-' = eval firstPart x - eval secondPart x
          | getSign resTuple == '*' = eval firstPart x * eval secondPart x
@@ -268,10 +263,10 @@ eval f x | f == "sin(x)" = sin x
          | getSign resTuple == '/' = eval firstPart x / eval secondPart x
          | getSign resTuple == '^' && firstPart == "0" && secondPart == "0" = 0/0
          | getSign resTuple == '^' = eval firstPart x ** eval secondPart x
-         | otherwise = 9
-            where minusRes = (-1) * (eval (cutFirst withOutStartAndEnd) x)
-                  withOutStartAndEnd = cutFirstAndLast f True ""
-                  resTuple = bracketsHandler withOutStartAndEnd 0 "" "" '@'
+         | otherwise = 0/0
+            where minusDiff = (-1) * (eval (cutFirst withOutBrackets) x)
+                  withOutBrackets = cutFirstAndLast f True ""
+                  resTuple = bracketsHandler withOutBrackets 0 "" ""
                   firstPart = getFirstStr resTuple
                   secondPart = getSecondStr resTuple
 
@@ -279,15 +274,10 @@ eval f x | f == "sin(x)" = sin x
 stringForTestCreator :: Int -> Bool -> [Char] -> [Char]
 stringForTestCreator cnt isFirst res | cnt == 0 = res
                                      | isFirst = stringForTestCreator (cnt-1) False "x"
-                                     | otherwise = stringForTestCreator (cnt-1) False ("(" ++ res ++ "/" ++ res ++ ")")
-
--- define function that calc the length of the string
-len :: [Char] -> Int
-len [] = 0
-len (a:ax) = (len ax) + 1
+                                     | otherwise = stringForTestCreator (cnt-1) False ("(" ++ res ++ "*" ++ res ++ ")")
 
 -- main function
 main :: IO ()
 main = do
-    print $ eval (diff $ stringForTestCreator 9 True "") 0.5
-    print $ eval (diff $ "(((x^ln(x))*sin(x))/(arccos(x)+(5*x)))") 0.5
+    print $ eval (diff $ stringForTestCreator 9 True "") 1
+    print $ eval (diff "(((x^ln(x))*sin(x))/(arccos(x)+(5*x)))") 0.5

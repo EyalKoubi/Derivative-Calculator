@@ -169,11 +169,11 @@ def exponent_handeling(f_x,g_x,df_x,dg_x) -> str:
     if f_x == "0":
         return "0"
     if g_x == "0":
-        return "1"
+        return "0"
     if f_x == "1":
-        return "1"
+        return "0"
     if g_x == "1":
-        return f_x
+        return df_x
     start = numbers_handeling(f_x,g_x,"^")
     first_part_exp = first_part_exp_d(dg_x,f_x)
     second_part_exp = second_part_exp_d(g_x,f_x,df_x)
