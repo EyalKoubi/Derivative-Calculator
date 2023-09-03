@@ -279,5 +279,7 @@ stringForTestCreator cnt isFirst res | cnt == 0 = res
 -- main function
 main :: IO ()
 main = do
+    print $ diff $ stringForTestCreator 9 True ""
     print $ eval (diff $ stringForTestCreator 9 True "") 1
-    print $ eval (diff "(((x^ln(x))*sin(x))/(arccos(x)+(5*x)))") 0.5
+    print $ eval (stringForTestCreator 9 True "") 1
+    

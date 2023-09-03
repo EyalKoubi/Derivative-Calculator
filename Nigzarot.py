@@ -137,7 +137,7 @@ def plus_or_minus_handeling(df_x,dg_x,sign) -> str:
 
 # define function that hendeling *
 # (in Diff function)
-def multiply_handeling(f_x,g_x,df_x,dg_x,sign):
+def multiply_handeling(f_x,g_x,df_x,dg_x,sign) -> str:
     if df_x == "0" or g_x == "0":
         if f_x == "0" or dg_x == "0":
             return "0";
@@ -298,12 +298,16 @@ def Eval(f, x="not exists") -> float:
     raise ValueError("Invalid function")
     
 string = "x"
-for i in range(300):
-    string = "(" + string + "/" + "x)"
+for i in range(8):
+    string = "(" + string + "*" + string + ")"
  
 before = time.time()
-print(Diff("(x^2)"))
-print(Eval(Diff("(((x^ln(x))*sin(x))/(arccos(x)+(5*x)))"),0.5))
+#print(Diff("(x^2)"))
+#print(Eval(Diff("(-(((x^ln(x))*sin(x))/(arccos(x)+(5*x))))"),0.5))
+print("len(string):",len(string))
+print(Eval(Diff(string),1))
+print(Eval(Diff(string)))
+print(Diff(string))
 T = time.time() - before
 
-print("T: ",T)
+print("running time on Python: ",T)
