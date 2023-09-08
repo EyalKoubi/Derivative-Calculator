@@ -160,9 +160,7 @@ secondPartOfExpDiff gx fx dfx | fx == "0" = error "Math Error"
 -- define function that handle ^ diff
 exponentHandeller :: [Char] -> [Char] -> [Char]
 exponentHandeller firstStr secondStr | (firstStr == "0" && secondStr == "0") = error "Math Error"
-                                     | firstStr == "0" = "0"
-                                     | secondStr == "0" = "0"
-                                     | firstStr == "1" = "0"
+                                     | firstStr == "0" || secondStr == "0" || firstStr == "1" = "0"
                                      | secondStr == "1" = df
                                      | otherwise = numbersHandeller start end '*'
                                         where
