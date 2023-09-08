@@ -302,9 +302,11 @@ for i in range(8):
     string = "(" + string + "*" + string + ")"
  
 before = time.time()
-#print(Diff("(x^2)"))
+#print(Diff("((x^x)^(x^x))"))
+#print(Diff(string))
+#print("string: ", string)
 #print(Eval(Diff("(-(((x^ln(x))*sin(x))/(arccos(x)+(5*x))))"),0.5))
-print("len(string):",len(string))
+#print("len(string):",len(string))
 print(Eval(Diff(string),1))
 print(Eval(Diff(string)))
 print(Diff(string))
