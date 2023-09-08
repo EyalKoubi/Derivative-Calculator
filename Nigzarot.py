@@ -91,11 +91,6 @@ def is_number(string) -> bool:
         return is_number(string[1:])
     if string[0] == '.':
         return False
-    if string[0] == '0':
-        if len(string) == 1:
-            return True
-        elif string[1] != '.':
-            return False
     dot_appeared = False
     for i in range(len(string)):
         if string[i] == ".":
