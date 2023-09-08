@@ -11,16 +11,36 @@ CREATION_SIGNS = {'+','-','*','/','^'}
 NUMBERS = {'0','1','2','3','4','5','6','7','8','9'}
 
 # base set
-B = {'sin(x)','cos(x)','tg(x)','arcsin(x)','arcsin(x)','arctg(x)','exp(x)','ln(x)','x'}
+B = {'sin(x)','cos(x)','tg(x)','arcsin(x)','arccos(x)','arctg(x)','exp(x)','ln(x)','x'}
 
 # diff of base functions set
-B_DIFF = {"cos(x)","-sin(x)","(1 / (cos(x) ** 2))","(1 / sqrt(1 - x ** 2))","(1 / (1 + x ** 2))","exp(x)","(1 / x)","0","1"}
+B_DIFF = {"cos(x)","-sin(x)","(1 / (cos(x) ** 2))","(1 / sqrt(1 - x ** 2))","(-1 / sqrt(1 - x ** 2))","(1 / (1 + x ** 2))","exp(x)","(1 / x)","0","1"}
 
-# define function that return
-# function or value depending
-# of the value of x variable
-def x_exists_handler(func,result,x):
-    return result if x!="not exists" else func
+B_DIFF_MAP = {"sin(x)": "cos(x)",
+              "cos(x)": "-sin(x)",
+              "tg(x)": "(1 / (cos(x) ** 2))",
+              "arcsin(x)": "(1 / sqrt(1 - x ** 2))",
+              "arccos(x)": "(-1 / sqrt(1 - x ** 2))",
+              "arctg(x)": "(1 / (1 + x ** 2))",
+              "exp(x)": "exp(x)",
+              "ln(x)": "(1 / x)",
+              "x": "1"}
+
+B_EVAL_FUNCTIONS_MAP = {"sin(x)": np.sin,
+                        "cos(x)": np.cos,
+                        "tg(x)": np.tan,
+                        "arcsin(x)": np.arcsin,
+                        "arccos(x)": np.arccos,
+                        "arctg(x)": np.arctan,
+                        "exp(x)": np.exp,
+                        "ln(x)": np.log,
+                        "-sin(x)": lambda x: -np.sin(x),
+                        "(1 / (cos(x) ** 2))": lambda x: 1 / (np.cos(x) ** 2),
+                        "(1 / sqrt(1 - x ** 2))": lambda x: 1 / np.sqrt(1 - x ** 2),
+                        "(1 / (1 + x ** 2))": lambda x: 1 / (1 + x ** 2),
+                        "(1 / x)": lambda x: 1 / x,
+                        "(2*x)": lambda x: 2*x,
+                        "x": lambda x: x}
 
 # define function that handle
 # "-" sign evaluation
@@ -68,11 +88,14 @@ def eval_creation_signs_handeling(f,g,sign,x):
 def is_number(string) -> bool:
     global NUMBERS
     if string[0] == '-':
-        string = string[1:]
+        return is_number(string[1:])
     if string[0] == '.':
         return False
     if string[0] == '0':
-        return True if len(string) == 1 else False
+        if len(string) == 1:
+            return True
+        elif string[1] != '.':
+            return False
     dot_appeared = False
     for i in range(len(string)):
         if string[i] == ".":
@@ -104,9 +127,8 @@ def numbers_handeling(string_one,string_two,sign) -> str:
 # 'adish' number (like 0 for + or 1 for *..)
 def adish_handeling(string_one,string_two,adish) -> str:
     if string_one == adish:
-        return adish if string_two == adish else string_two
-    if string_two == adish:
-        return string_one
+        return string_two
+    return string_one
 
 # in ^ diff: handle g'(x)*ln(f(x)) part
 def first_part_exp_d(dg_x,f_x) -> str:
@@ -166,11 +188,7 @@ def division_handeling(f_x,g_x,df_x,dg_x):
 def exponent_handeling(f_x,g_x,df_x,dg_x) -> str:
     if f_x == "0" and g_x == "0":
         raise ValueError("Math Error")
-    if f_x == "0":
-        return "0"
-    if g_x == "0":
-        return "0"
-    if f_x == "1":
+    if f_x == "0" or g_x == "0" or f_x == "1":
         return "0"
     if g_x == "1":
         return df_x
@@ -186,33 +204,17 @@ def exponent_handeling(f_x,g_x,df_x,dg_x) -> str:
 def Diff(f) -> str:
     
     # bases cases handeling
-    if f == 'sin(x)':
-        return "cos(x)"
-    if f == 'cos(x)':
-        return "-sin(x)"
-    if f == 'tg(x)':
-        return "(1 / (cos(x) ** 2))"
-    if f == 'arcsin(x)':
-        return "(1 / sqrt(1 - x ** 2))"
-    if f == 'arccos(x)':
-        return "(-1 / sqrt(1 - x ** 2))"
-    if f == 'arctg(x)':
-        return "(1 / (1 + x ** 2))"
-    if f == 'exp(x)':
-        return "exp(x)"
-    if f == 'ln(x)':
-        return "(1 / x)"
+    if f in B_DIFF_MAP.keys():
+        return B_DIFF_MAP[f]
     if is_number(f):
         return "0"
-    if f == "x":
-        return "1"
     if f[0] != '(' or f[-1] != ')':
         raise ValueError("Invalid function")
         
     # "-" case handeling
     string = f[1:-1]
     if string[0] == '-':
-        return '(' + '-' + Diff(string[1:]) + ')'
+        return "(-" + Diff(string[1:]) + ")"
     
     # creation signs handeling
     brackets = 0
@@ -239,41 +241,17 @@ def Diff(f) -> str:
 # function, or the value of the function
 # for specific x in the function
 # (if x is given)
-def Eval(f, x="not exists") -> float:
+def Eval(f, x="not exists"):
     
     # bases cases handeling
-    if f == 'sin(x)':
-        return x_exists_handler(np.sin,np.sin(x),x)
-    if f == 'cos(x)':
-        return x_exists_handler(np.cos,np.cos(x),x)
-    if f == 'tg(x)':
-        return x_exists_handler(np.tan,np.tan(x),x)
-    if f == 'arcsin(x)':
-        return x_exists_handler(np.arcsin,np.arcsin(x),x)
-    if f == 'arccos(x)':
-        return x_exists_handler(np.arccos,np.arccos(x),x)
-    if f == 'arctg(x)':
-        return x_exists_handler(np.arctan,np.arctan(x),x)
-    if f == 'exp(x)':
-        return x_exists_handler(np.exp,np.exp(x),x)
-    if f == 'ln(x)':
-        return x_exists_handler(np.log,np.log(x),x)
-    if f == "-sin(x)":
-        return x_exists_handler(lambda x: -np.sin(x),-np.sin(x),x)
-    if f == "(1 / (cos(x) ** 2))":
-        return x_exists_handler(lambda x: 1 / (np.cos(x) ** 2),1 / (np.cos(x) ** 2),x)
-    if f == "(1 / sqrt(1 - x ** 2))":
-        return x_exists_handler(lambda x: 1 / np.sqrt(1 - x ** 2),1 / np.sqrt(1 - x ** 2),x)
-    if f == "(1 / (1 + x ** 2))":
-        return x_exists_handler(lambda x: 1 / (1 + x ** 2),1 / (1 + x ** 2),x)
-    if f == "(1 / x)":
-        return x_exists_handler(lambda x: 1 / x,1 / x,x)
+    if x == "not exists" and f in B_EVAL_FUNCTIONS_MAP.keys():
+        return B_EVAL_FUNCTIONS_MAP[f]
+    if f in B_EVAL_FUNCTIONS_MAP.keys():
+        return B_EVAL_FUNCTIONS_MAP[f](x)
+    if x == "not exists" and is_number(f):
+        return lambda x: float(f)
     if is_number(f):
-        return x_exists_handler(lambda x: float(f),float(f),x)
-    if f == "x":
-        return x_exists_handler(lambda x: x,x,x)
-    if f == "(2*x)":
-        return x_exists_handler(lambda x: 2*x,2*x,x)
+        return float(f)
     
     # "-" case handeling
     string = f[1:-1]
@@ -305,11 +283,12 @@ before = time.time()
 #print(Diff("((x^x)^(x^x))"))
 #print(Diff(string))
 #print("string: ", string)
-#print(Eval(Diff("(-(((x^ln(x))*sin(x))/(arccos(x)+(5*x))))"),0.5))
+print(Eval(Diff("(-(((x^ln(x))*sin(x))/(arccos(x)+(5*x))))"),0.5))
 #print("len(string):",len(string))
 print(Eval(Diff(string),1))
 print(Eval(Diff(string)))
-print(Diff(string))
+#sprint(Diff(string))
+print(Eval("sin(x)",1))
 T = time.time() - before
 
 print("running time on Python: ",T)
