@@ -215,7 +215,7 @@ eval f x | f == "sin(x)" = sin x
          | getSign resTuple == '+' = eval firstPart x + eval secondPart x
          | getSign resTuple == '-' = eval firstPart x - eval secondPart x
          | getSign resTuple == '*' = eval firstPart x * eval secondPart x
-         | getSign resTuple == '/' && secondPart == "0" = 0/0
+         | getSign resTuple == '/' && secondPart == "0" = error "Math Error"
          | getSign resTuple == '/' = eval firstPart x / eval secondPart x
          | getSign resTuple == '^' && firstPart == "0" && secondPart == "0" = error "Math Error"
          | getSign resTuple == '^' = eval firstPart x ** eval secondPart x
