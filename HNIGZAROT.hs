@@ -90,7 +90,7 @@ numbersHandeller firstStr secondStr sign | isNumber firstStr && isNumber secondS
 -- define function that handle 2 strings and 1 sign (handle adish case)
 adishHandeller :: [Char] -> [Char] -> [Char] -> [Char]
 adishHandeller firstStr secondStr adish | firstStr == adish = secondStr
-                                        | secondStr == adish = firstStr
+                                        | otherwise = firstStr
 
 -- define function that handle + diff
 plusOrMinusHandller :: [Char] -> [Char] -> Char -> [Char]
@@ -241,7 +241,7 @@ main = do
     let res3 = eval (stringForTestCreator 9 True "") 1
     print res2
     print res3
-    -- print $ eval (diff "(-(((x^ln(x))*sin(x))/(arccos(x)+(5*x))))") 0.5
+    print $ eval (diff "(-(((x^ln(x))*sin(x))/(arccos(x)+(5*x))))") 0.5
     tt_end <- getCurrentTime
     print (diffUTCTime tt_end tt_start)
     
