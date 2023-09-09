@@ -29,14 +29,13 @@ isNumberWithCnt (a:ax) cnt dotCnt isFirst | isFirst && ax == [] = isDigit a
 isNumber :: [Char] -> Bool
 isNumber str = isNumberWithCnt str 0 0 True
 
--- define function that check if not ( (the first letter is specific letter) and (the last letter is specific letter) )
--- for future use to see if we have starting and ending brackets (in the string)
-checkFirstAndLast :: [Char] -> Char -> Char -> Bool -> Bool
-checkFirstAndLast [] _ _ _ = True
-checkFirstAndLast (a:ax) letterOne letterTwo isFirst | isFirst && (not (a == letterOne)) = checkFirstAndLast ax letterOne letterTwo False
-                                                                            | isFirst = False
-                                                                            | (ax == []) && (not (a == letterTwo)) = True
-                                                                            | otherwise = checkFirstAndLast ax letterOne letterTwo False
+-- define function that check if the string starts with '(' and end with ')'
+checkBrackets :: [Char] -> Bool -> Bool
+checkBrackets [] _ = False
+checkBrackets (a:ax) isFirst | isFirst && (a == '(') = checkBrackets ax False
+                             | isFirst = False
+                             | (ax == []) && (a == ')') = True
+                             | otherwise = checkBrackets ax False
 
 -- define function that cut the first letter from the string
 cutFirst :: [Char] -> [Char]
@@ -179,7 +178,7 @@ diff str | str == "sin(x)" = "cos(x)"
          | str == "ln(x)" = "(1 / x)"
          | str == "x" = "1"
          | isNumber str = "0"
-         | checkFirstAndLast str '(' ')' True = error "Syntax Error"
+         | not (checkBrackets str True) = error "Syntax Error"
          | isFirstIsSomething withOutBrackets '-' && isNumber minusDiff = "-" ++ minusDiff
          | isFirstIsSomething withOutBrackets '-' = "(-" ++ minusDiff ++ ")"
          | getSign resTuple == '+' = plusOrMinusHandller firstPart secondPart '+'
@@ -211,7 +210,7 @@ eval f x | f == "sin(x)" = sin x
          | f == "(1 / x)" = (1 / x)
          | isNumber f = stringToDouble f
          | f == "x" = x
-         | checkFirstAndLast f '(' ')' True = error "Syntax Error"
+         | not (checkBrackets f True) = error "Syntax Error"
          | isFirstIsSomething withOutBrackets '-' = minusDiff
          | getSign resTuple == '+' = eval firstPart x + eval secondPart x
          | getSign resTuple == '-' = eval firstPart x - eval secondPart x
