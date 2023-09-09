@@ -1,15 +1,6 @@
 
 import Data.Time.Clock
 
--- define function that return the last letter of the string
-tailOfStr :: [Char] -> Char -> Char
-tailOfStr [] last = last
-tailOfStr (a:ax) last = tailOfStr ax a
-
--- define function that check if the last letter is a specific letter
-isLastIsSomething :: [Char] -> Char -> Bool
-isLastIsSomething str letter = tailOfStr str '@' == letter
-
 -- define function that check if the first letter is a specific letter
 isFirstIsSomething :: [Char] -> Char -> Bool
 isFirstIsSomething [] letter = False
@@ -40,8 +31,12 @@ isNumber str = isNumberWithCnt str 0 0 True
 
 -- define function that check if not ( (the first letter is specific letter) and (the last letter is specific letter) )
 -- for future use to see if we have starting and ending brackets (in the string)
-isNotFirstIsSomethingOrNotLastIsSomthing :: [Char] -> Char -> Char -> Bool
-isNotFirstIsSomethingOrNotLastIsSomthing str letterOne letterTwo = not (isFirstIsSomething str letterOne && isLastIsSomething str letterTwo)
+checkFirstAndLast :: [Char] -> Char -> Char -> Bool -> Bool
+checkFirstAndLast [] _ _ _ = True
+checkFirstAndLast (a:ax) letterOne letterTwo isFirst | isFirst && (not (a == letterOne)) = checkFirstAndLast ax letterOne letterTwo False
+                                                                            | isFirst = False
+                                                                            | (ax == []) && (not (a == letterTwo)) = True
+                                                                            | otherwise = checkFirstAndLast ax letterOne letterTwo False
 
 -- define function that cut the first letter from the string
 cutFirst :: [Char] -> [Char]
@@ -184,7 +179,7 @@ diff str | str == "sin(x)" = "cos(x)"
          | str == "ln(x)" = "(1 / x)"
          | str == "x" = "1"
          | isNumber str = "0"
-         | isNotFirstIsSomethingOrNotLastIsSomthing str '(' ')' = error "Syntax Error"
+         | checkFirstAndLast str '(' ')' True = error "Syntax Error"
          | isFirstIsSomething withOutBrackets '-' && isNumber minusDiff = "-" ++ minusDiff
          | isFirstIsSomething withOutBrackets '-' = "(-" ++ minusDiff ++ ")"
          | getSign resTuple == '+' = plusOrMinusHandller firstPart secondPart '+'
@@ -216,6 +211,7 @@ eval f x | f == "sin(x)" = sin x
          | f == "(1 / x)" = (1 / x)
          | isNumber f = stringToDouble f
          | f == "x" = x
+         | checkFirstAndLast f '(' ')' True = error "Syntax Error"
          | isFirstIsSomething withOutBrackets '-' = minusDiff
          | getSign resTuple == '+' = eval firstPart x + eval secondPart x
          | getSign resTuple == '-' = eval firstPart x - eval secondPart x
@@ -247,7 +243,6 @@ main = do
     print res2
     print res3
     print $ eval (diff "(-(((x^ln(x))*sin(x))/(arccos(x)+(5*x))))") 0.5
-    print $ isNumber ".2"
     tt_end <- getCurrentTime
     print (diffUTCTime tt_end tt_start)
     
