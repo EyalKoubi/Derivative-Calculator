@@ -54,12 +54,12 @@ isCreationSign :: Char -> Bool
 isCreationSign letter = (letter == '+' || letter == '-' || letter == '*' || letter == '/' || letter == '^')
 
 -- define function that handle brackets and returns (alpha,beta,@) tuple for alpha@beta
-bracketsHandler :: [Char] -> Int -> [Char] -> [Char] -> ([Char], [Char], Char)
-bracketsHandler [] _ left right = (left,right,'@')
-bracketsHandler (a:ax) cnt left right | isCreationSign a && cnt == 0 = (left,ax,a)
-                                      | a == '(' = bracketsHandler ax (cnt+1) (left ++ [a]) right
-                                      | a == ')' = bracketsHandler ax (cnt-1) (left ++ [a]) right
-                                      | otherwise = bracketsHandler ax cnt (left ++ [a]) right
+bracketsHandler :: [Char] -> Int -> [Char] -> ([Char], [Char], Char)
+bracketsHandler [] _ left = (left,"",'@')
+bracketsHandler (a:ax) cnt left | isCreationSign a && cnt == 0 = (left,ax,a)
+                                | a == '(' = bracketsHandler ax (cnt+1) (left ++ [a])
+                                | a == ')' = bracketsHandler ax (cnt-1) (left ++ [a])
+                                | otherwise = bracketsHandler ax cnt (left ++ [a])
 
 -- define function that get str from the tuple
 getFromStrTuple :: ([Char], [Char], Char) -> Int -> [Char]
@@ -189,7 +189,7 @@ diff str | str == "sin(x)" = "cos(x)"
          | otherwise = error "Syntax Error"
             where withOutBrackets = cutFirstAndLast str True ""
                   minusDiff = diff $ cutFirst withOutBrackets
-                  resTuple = bracketsHandler withOutBrackets 0 "" ""
+                  resTuple = bracketsHandler withOutBrackets 0 ""
                   firstPart = getFromStrTuple resTuple 1
                   secondPart = getFromStrTuple resTuple 2
 
@@ -222,7 +222,7 @@ eval f x | f == "sin(x)" = sin x
          | otherwise = error "Syntax Error"
             where minusDiff = (-1) * (eval (cutFirst withOutBrackets) x)
                   withOutBrackets = cutFirstAndLast f True ""
-                  resTuple = bracketsHandler withOutBrackets 0 "" ""
+                  resTuple = bracketsHandler withOutBrackets 0 ""
                   firstPart = getFromStrTuple resTuple 1
                   secondPart = getFromStrTuple resTuple 2
 
@@ -241,7 +241,7 @@ main = do
     let res3 = eval (stringForTestCreator 9 True "") 1
     print res2
     print res3
-    print $ eval (diff "(-(((x^ln(x))*sin(x))/(arccos(x)+(5*x))))") 0.5
+    -- print $ eval (diff "(-(((x^ln(x))*sin(x))/(arccos(x)+(5*x))))") 0.5
     tt_end <- getCurrentTime
     print (diffUTCTime tt_end tt_start)
     
