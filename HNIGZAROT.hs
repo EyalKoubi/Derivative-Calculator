@@ -23,6 +23,7 @@ isNumberWithCnt :: [Char] -> Int -> Int -> Bool -> Bool
 isNumberWithCnt [] cnt dotCnt isFirst = not (cnt == 0)
 isNumberWithCnt (a:ax) cnt dotCnt isFirst | isFirst && ax == [] = isDigit a
                                           | isFirst && a == '-' = isNumberWithCnt ax 0 0 True
+                                          | isFirst && a == '.' = False  
                                           | (ax == []) = isDigit a
                                           | ((not (isDigit a)) && (not (a == '.'))) || ((a == '.') && (dotCnt == 1)) = False
                                           | a == '.' = isNumberWithCnt ax (cnt+1) (dotCnt+1) False
@@ -246,6 +247,7 @@ main = do
     print res2
     print res3
     print $ eval (diff "(-(((x^ln(x))*sin(x))/(arccos(x)+(5*x))))") 0.5
+    print $ isNumber ".2"
     tt_end <- getCurrentTime
     print (diffUTCTime tt_end tt_start)
     
