@@ -239,6 +239,7 @@ main = do
     let res1 =  diff $ stringForTestCreator 9 True ""
     let res2 = eval res1 1
     let res3 = eval (stringForTestCreator 9 True "") 1
+    print res1
     print res2
     print res3
     print $ eval (diff "(-(((x^ln(x))*sin(x))/(arccos(x)+(5*x))))") 0.5
