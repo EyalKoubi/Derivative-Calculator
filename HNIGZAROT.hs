@@ -244,5 +244,5 @@ main = do
     print res3
     print $ eval (diff "(-(((x^ln(x))*sin(x))/(arccos(x)+(5*x))))") 0.5
     tt_end <- getCurrentTime
-    print (diffUTCTime tt_end tt_start)
+    print $ diffUTCTime tt_end tt_start
     
